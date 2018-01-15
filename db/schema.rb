@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 20180115161436) do
     t.string "voicemail_url"
     t.string "status"
     t.integer "duration"
+    t.string "direction"
     t.datetime "completed_at"
   end
 

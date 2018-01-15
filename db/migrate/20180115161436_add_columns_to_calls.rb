@@ -6,6 +6,7 @@ class AddColumnsToCalls < ActiveRecord::Migration[5.1]
     add_column :calls, :voicemail_url, :string
     add_column :calls, :status, :string
     add_column :calls, :duration, :integer
+    add_column :calls, :direction, :string
     add_column :calls, :completed_at, :datetime
   end
 end

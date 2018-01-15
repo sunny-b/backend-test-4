@@ -19,7 +19,8 @@ class CallsController < ApplicationController
   # POST /calls
   # Create call entry in database
   def create
-    @call = Call.new(params)
+    call = Call.new
+    call.update_and_save(params)
     user_selection = params[:Digits]
 
     case user_selection
@@ -46,16 +47,16 @@ class CallsController < ApplicationController
   end
 
   def voicemail
-    call = Call.find(params[:CallSid])
-
-    call.voicemail_url = params[:RecordingUrl]
-    call.save!
+    call = Call.find_by!(twilio_call_id: params[:CallSid])
+    call.update_and_save(params)
   end
 
   def forward_call
     response = Twilio::TwiML::VoiceResponse.new do |r|
       r.say('Forwarding Call.')
-      r.dial(number: FORWARDING_NUMBER)
+      r.dial(number: FORWARDING_NUMBER,
+             status_callback: status_path,
+             status_callback_method: 'POST')
     end
 
     render xml: response.to_s
@@ -65,7 +66,9 @@ class CallsController < ApplicationController
     response = Twilio::TwiML::VoiceResponse.new do |r|
       r.say('Please leave a message at the beep.\nPress the pound key when finished.')
       r.record(timeout: 10,
-               action: voicemail_path,
+               action: voicemail_recorded_path,
+               recording_status_callback: voicemail_path,
+               recording_status_callback_method: 'POST'
                finish_on_key: '#')
     end
 
