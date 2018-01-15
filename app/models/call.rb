@@ -8,8 +8,7 @@ class Call < ApplicationRecord
       to: params[:To],
       status: params[:CallStatus],
       duration: params[:CallDuration],
-      direction: params[:Direction],
-      voicemail_url: params[:RecordingUrl]
+      direction: params[:Direction]
     }
 
     self.completed_at = DateTime.current if params[:CallStatus] == 'completed'
