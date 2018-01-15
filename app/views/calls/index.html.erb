@@ -26,7 +26,11 @@ th, td {
       <td><%= call.created_at ? display_datetime(call.created_at) : nil %></td>
       <td><%= call.completed_at ? display_datetime(call.completed_at) : nil %></td>
       <td><%= call.duration %> seconds</td>
-      <td><a href="<%= call.voicemail_url %>">Recording</a></td>
+      <% if call.voicemail_url %>
+        <td><a href="<%= call.voicemail_url %>">Recording</a></td>
+      <% else %>
+        <td>N/A</td>
+      <% end %>
     </tr>
   <% end %>
 
