@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180115161436) do
+ActiveRecord::Schema.define(version: 20180115220353) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,7 +24,6 @@ ActiveRecord::Schema.define(version: 20180115161436) do
     t.string "voicemail_url"
     t.string "status"
     t.integer "duration"
-    t.string "direction"
     t.datetime "completed_at"
   end
 

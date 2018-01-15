@@ -1,0 +1,33 @@
+<style>
+th, td {
+  min-width: 150px;
+  text-align: center;
+}
+</style>
+
+<h1>Activity Feed</h1>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>From</th>
+    <th>To</th>
+    <th>Started At</th>
+    <th>Completed At</th>
+    <th>Duration</th>
+    <th>Voicemail Recording</th>
+  </tr>
+
+  <% @calls.each do |call| %>
+    <tr>
+      <td><%= call.twilio_call_id %></td>
+      <td><%= call.from[2..-1] %></td>
+      <td><%= call.to[2..-1] %></td>
+      <td><%= display_datetime(call.created_at) %></td>
+      <td><%= display_datetime(call.completed_at) %></td>
+      <td><%= call.duration %> seconds</td>
+      <td><a href="<%= call.voicemail_url %>">Recording</a></td>
+    </tr>
+  <% end %>
+
+</table>

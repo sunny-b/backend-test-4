@@ -6,9 +6,9 @@ class CallsController < ApplicationController
 
   FORWARD_CALL = '1'.freeze
   LEAVE_A_MESSAGE = '2'.freeze
-  FORWARDING_NUMBER = '+12017900279'.freeze
+  FORWARDING_NUMBER = '+15556667777'.freeze
 
-  # GET /
+  # GET / OR /calls
   # Activity feed page
   # JSON api
   def index
@@ -46,10 +46,13 @@ class CallsController < ApplicationController
     response.to_s
   end
 
+  # POST /status
   def status_update
     Call.create_or_update(params)
+    head :no_content
   end
 
+  # POST /voicemail
   def voicemail_update
     call = Call.find_by!(twilio_call_id: params[:CallSid])
     call.voicemail_url = params[:RecordingUrl]
@@ -59,10 +62,7 @@ class CallsController < ApplicationController
   def forward_call
     response = Twilio::TwiML::VoiceResponse.new do |r|
       r.say('Forwarding Call.')
-      r.dial(number: FORWARDING_NUMBER,
-             status_callback_event: 'initiated ringing answered completed',
-             status_callback: status_update_path,
-             status_callback_method: 'POST')
+      r.dial(number: FORWARDING_NUMBER)
       r.say('Good Bye.')
       r.hangup
     end
@@ -72,10 +72,11 @@ class CallsController < ApplicationController
 
   def record_voicemail
     response = Twilio::TwiML::VoiceResponse.new do |r|
-      r.say('Please leave a message at the beep.
-             Press the pound key when finished.')
+      r.say('Please leave a message after the beep.
+             Press the pound key when you are finished.')
       r.record(timeout: 10,
-               action: voicemail_recorded_path,
+               action: voicemail_complete_path,
+               method: 'GET',
                recording_status_callback: voicemail_update_path,
                recording_status_callback_method: 'POST',
                finish_on_key: '#')
@@ -86,9 +87,10 @@ class CallsController < ApplicationController
     response.to_s
   end
 
-  def voicemail_recorded
+  # GET /voicemail_complete
+  def voicemail_complete
     response = Twilio::TwiML::VoiceResponse.new do |r|
-      r.say('Your message has been saved.')
+      r.say('Your message has been saved. Good bye.')
       r.hangup
     end
 
