@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  post '/ivr', to: 'ivr#main_menu', as: :menu
-  post '/ivr/menu_selection', as: :menu_selection
-  post '/ivr/voicemail', as: :voicemail
+  resources :calls, only: [:index, :create]
+
+  post '/calls/menu', to: 'calls#main_menu', as: :menu
+  post '/calls/voicemail', as: :voicemail
 end

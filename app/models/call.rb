@@ -1,2 +1,3 @@
 class Call < ApplicationRecord
+  
 end
