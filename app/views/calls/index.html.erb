@@ -23,8 +23,8 @@ th, td {
       <td><%= call.twilio_call_id %></td>
       <td><%= call.from[2..-1] %></td>
       <td><%= call.to[2..-1] %></td>
-      <td><%= display_datetime(call.created_at) %></td>
-      <td><%= display_datetime(call.completed_at) %></td>
+      <td><%= call.created_at ? display_datetime(call.created_at) : nil %></td>
+      <td><%= call.completed_at ? display_datetime(call.completed_at) : nil %></td>
       <td><%= call.duration %> seconds</td>
       <td><a href="<%= call.voicemail_url %>">Recording</a></td>
     </tr>
