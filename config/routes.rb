@@ -1,3 +1,5 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  post '/calls/menu', to: 'calls#main_menu', as: :menu
+  post '/calls/menu_selection', as: :menu_selection
+  post '/calls/voicemail', as: :voicemail
 end
