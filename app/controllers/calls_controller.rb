@@ -12,7 +12,7 @@ class CallsController < ApplicationController
   # Activity feed page
   # JSON api
   def index
-    @calls = Call.all
+    @calls = Call.order('id DESC')
 
     respond_to do |format|
       format.html
@@ -21,61 +21,53 @@ class CallsController < ApplicationController
   end
 
   # POST /calls
-  # Create call entry in database
+  # Initial entry point for webhook
   def create
-    call = Call.new
-    call.update_and_save(params)
+    call = Call.create_or_update(params)
     user_selection = params[:Digits]
 
-    case user_selection
-    when FORWARD_CALL    then forward_call
-    when LEAVE_A_MESSAGE then record_voicemail
-    else                      main_menu(false)
-    end
-  end
-
-  # POST /calls/menu
-  # Initial start point for Twilio webhook
-  def main_menu(first_time = true)
-    response = Twilio::TwiML::VoiceResponse.new
-    response.gather(num_digits: 1, action: '/calls', method: 'POST') do |gather|
-      if first_time
-        gather.say("Welcome to Sunny's Interactive Voice Response system.")
-      end
-
-      gather.say('Please press 1 to forward the call.')
-      gather.say('Please press 2 to leave a message.')
-    end
+    response = case user_selection
+               when FORWARD_CALL    then forward_call
+               when LEAVE_A_MESSAGE then record_voicemail
+               else                      main_menu
+               end
 
     render xml: response.to_s
   end
 
-  def status_update
-    call = Call.find_by!(twilio_call_id: params[:CallSid])
-    call.update_and_save(params)
+  def main_menu
+    response = Twilio::TwiML::VoiceResponse.new
+    response.gather(num_digits: 1, timeout: 10) do |gather|
+      gather.say("Welcome to Sunny's Interactive Voice Response system.")
+      gather.say('Please press 1 to forward the call.')
+      gather.say('Please press 2 to leave a message.')
+    end
 
-    head :no_content
+    response.to_s
+  end
+
+  def status_update
+    Call.create_or_update(params)
   end
 
   def voicemail_update
     call = Call.find_by!(twilio_call_id: params[:CallSid])
     call.voicemail_url = params[:RecordingUrl]
     call.save!
-
-    head :no_content
   end
 
   def forward_call
     response = Twilio::TwiML::VoiceResponse.new do |r|
       r.say('Forwarding Call.')
       r.dial(number: FORWARDING_NUMBER,
+             status_callback_event: 'initiated ringing answered completed',
              status_callback: status_update_path,
              status_callback_method: 'POST')
       r.say('Good Bye.')
       r.hangup
     end
 
-    render xml: response.to_s
+    response.to_s
   end
 
   def record_voicemail
@@ -91,7 +83,7 @@ class CallsController < ApplicationController
       r.hangup
     end
 
-    render xml: response.to_s
+    response.to_s
   end
 
   def voicemail_recorded
